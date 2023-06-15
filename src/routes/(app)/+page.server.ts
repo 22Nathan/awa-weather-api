@@ -1,9 +1,15 @@
 
 
+import type { Config } from '@sveltejs/adapter-vercel'
+
+
 import type { PageServerLoad, Actions } from './$types'
 
 import { WEATHERAPIKEY } from '$env/static/private'
 
+export const config: Config = {
+    runtime: 'edge'
+};
 
 
 const apiErrorsStatus = [ 400 , 401 , 403 ]
