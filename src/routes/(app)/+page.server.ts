@@ -40,11 +40,11 @@ export const actions = {
         if (apiErrorsStatus.includes( res.status )) {
             return { 
                 location:{ 
-                    name:'undefined' 
+                    name:'?' 
                 }, 
                 current:{ 
-                    temp_c:'undefined', 
-                    temp_f:'undefined' 
+                    temp_c:'?', 
+                    temp_f:'?' 
                 } 
             }
         }
