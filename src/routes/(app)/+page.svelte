@@ -2,337 +2,189 @@
 
 <script lang="ts">
 
-    import { enhance } from '$app/forms'
     import type { ActionData , PageServerData } from './$types'
+    import { enhance } from '$app/forms'
     import { onMount } from 'svelte'
+    import { gsap } from "gsap"
+    import { horizontalLoopSlider } from '$lib/utils/horizontalLoopSlider'
 
     export let form :ActionData
     export let data :PageServerData
 
+    $: result = form ? form : data
+
+    // $: console.log(result)
     // $: console.log(form)
     // $: console.log(data)
     
-
     let inputRef: HTMLInputElement
     
-    onMount(()=>{
-        inputRef.focus()
-
-        // fetch('?/search', {
-        //     // headers: { 'Content-Type': 'application/json' },
-        //     method: 'POST',
-        //     body: JSON.stringify({q:data.ip})
-        // })
+    onMount(()=>{ 
+        inputRef?.focus() 
+        init()
     })
+
+    function marquee(selector: string) {
+        const boxes = gsap.utils.toArray(selector)
+        horizontalLoopSlider(boxes, { repeat: -1, paddingRight: 10, speed:gsap.utils.random(.1, .5), reversed:gsap.utils.random([true, false]) })
+    }
+
+    function init() {
+        for (let index = 1; index < 12; index++) {
+            marquee(`.marqueeItem${index}`)
+        }
+    }
     
 </script>
 
 <!--  -->
 
-    <main>
-        <a href="https://github.com/22nathan" target="_blank" class="pill"> 22Nathan </a>
-        <h1>Weather API Project</h1>
-        <p class="description">
-            Using API from weatherapi.com
-        </p>
+    <main class="">
 
-        <form action="?/search" method="POST" use:enhance>
+        <div class="flex flex-col gap-2 relative select-none overflow-hidden place-items-center mx-auto">
+
+            {#each Array.from({ length: 11 }, (_, i) => i + 1) as item}
+                <div class="flex gap-2">
+                    <div class="card marqueeItem{item}">
+                        <p>
+                            <span class="text-k">Your Location</span>
+                            <span class="text-v !text-lime-500">{result.location.name}</span>
+                        </p>
+                        <p>
+                            <span class="text-k">Current Temperature</span>
+                            <span class="text-v">{result.current.temp_c + '°C'} / {result.current.temp_f + '°F'}</span>
+                        </p>
+                    </div>
+                    <div class="card marqueeItem{item}">
+                        <p>
+                            <span class="text-k">Country</span>
+                            <span class="text-v">{result.location.country}</span>
+                        </p>
+                        <p>
+                            <span class="text-k">Local Time</span>
+                            <span class="text-v">{result.location.localtime}</span>
+                        </p>
+                    </div>
+                    <div class="card marqueeItem{item}">
+                        <p>
+                            <span class="text-k">Time Zone</span>
+                            <span class="text-v">{result.location.tz_id}</span>
+                        </p>
+                        <p>
+                            <span class="text-k">Feels</span>
+                            <span class="text-v">{result.current.feelslike_c + '°C'} / {result.current.feelslike_f + '°F'}</span>
+                        </p>
+                    </div>
+                    <div class="card marqueeItem{item}">
+                        <p>
+                            <img class="text-v" alt="weather-logo" src={result.current.condition.icon}/>
+                        </p>
+                    </div>
+                    <div class="card marqueeItem{item}">
+                        <p>
+                            <span class="text-k">Humidity</span>
+                            <span class="text-v">{result.current.humidity}</span>
+                        </p>
+                        <p>
+                            <span class="text-k">UV</span>
+                            <span class="text-v">{result.current.uv}</span>
+                        </p>
+                    </div>
+                    <div class="card marqueeItem{item}">
+                        <p>
+                            <span class="text-k">Current</span>
+                            <span class="text-v">{result.current.is_day ? 'Day' : 'Night'}</span>
+                        </p>
+                        <p>
+                            <span class="text-k">Last Fetched</span>
+                            <span class="text-v">{result.current.last_updated}</span>
+                        </p>
+                    </div>
+                    <div class="card marqueeItem{item}">
+                        <p>
+                            <span class="text-k">Latitude</span>
+                            <span class="text-v">{result.location.lat}</span>
+                        </p>
+                        <p>
+                            <span class="text-k">longitude</span>
+                            <span class="text-v">{result.location.lon}</span>
+                        </p>
+                    </div>
+                    <div class="card marqueeItem{item}">
+                        <p>
+                            <span class="text-k">Precipitation</span>
+                            <span class="text-v">{result.current.precip_in + ' inch'} / {result.current.precip_mm + ' mm'}</span>
+                        </p>
+                        <p>
+                            <span class="text-k">Pressure</span>
+                            <span class="text-v">{result.current.pressure_in + ' in'} / {result.current.pressure_mb + ' mb'}</span>
+                        </p>
+                    </div>
+                    <div class="card marqueeItem{item}">
+                        <p>
+                            <span class="text-k">Wind Direction</span>
+                            <span class="text-v">{result.current.wind_dir}</span>
+                        </p>
+                        <p>
+                            <span class="text-k">Wind</span>
+                            <span class="text-v">{result.current.wind_kph + ' kph'} / {result.current.wind_mph + ' mph'}</span>
+                        </p>
+                    </div>
+                </div>
+            {/each}
+
+        </div>
+
+        <form class="w-fit h-fit center" action="?/search" method="post">
             <input type="text" name="q" autocomplete="off" placeholder="City" bind:this={inputRef}>
         </form>
 
-        <div class="meta">
-            <div class="info">
-                <span>Location</span>
-                <span class="region"> 
-                    <strong>
-                        { #if form }
-                            {form.location.name}
-                        { :else }
-                            { #if data } {data.location.name} { /if }
-                        { /if }
-                    </strong> 
-                </span>
-            </div>
-            <div class="info">
-                <span>Current temperature</span>
-                <strong>
-                    { #if form }
-                        {form.current.temp_c}
-                    { :else } 
-                        { #if data } {data.current.temp_c} { /if }
-                    { /if }
-                    °C / 
-                    { #if form }
-                        {form.current.temp_f}
-                    { :else } 
-                        { #if data } {data.current.temp_f} { /if } 
-                    { /if }
-                    °F
-                </strong>
-            </div>
-        </div>
     </main>
-
-    <footer>
-        <div class="details">
-            <p>
-                Built with
-                <a target="_blank" href="https://kit.svelte.dev" rel="noreferrer">Sveltekit</a>
-                style from
-                <a target="_blank" href="https://vercel.com" rel="noreferrer">Vercel</a>
-            </p>
-        </div>
-    </footer>
-
-    <!-- { #if form }
-        {form.current.temp_c}
-    { /if } -->
 
 <!--  -->
 
 <style>
 
-    form input {
-        margin-top: 5vh;
-        border-radius: 5px;
-        padding: 10px 20px;
-        text-align: center;
+    .center { @apply
+        absolute inset-1/2 -translate-x-1/2 -translate-y-1/2
     }
 
-    @media (prefers-color-scheme: light) {
-        form input {
-            background: rgba(var(--bg),0.3);
-            border: 1px solid rgba(0,0,0,.5);
-            color: var(--fg);
-        }
+    main { @apply
+        text-white relative
+        w-full h-full 
+        flex gap-2
     }
 
-    @media (prefers-color-scheme: dark) {
-        form input {
-            background: rgba(var(--fg),0.3);
-            border: 1px solid rgba(255,255,255,.5);
-            color: var(--fg);
-        }
+    form { @apply
+        p-20 rounded-md bg-black/30 backdrop-blur-sm border border-white/10
     }
 
-    :global(html, body) {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;   
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; 
-        background-size: cover;
-        background-position: 50%;
-        background-repeat: no-repeat;
-        display: flex;
-        flex-direction: column;
-        /* background: var(--bg); */
-        color: var(--fg);
-        padding: 0 var(--root-padding);
+    form input { @apply
+        rounded-md px-5 py-1 text-start border border-white/10 bg-black/30
+        outline-black
     }
 
-    @media (prefers-color-scheme: light) {
-        :global(body) {
-            --fg: #000;
-            --bg: #fff;
-            --remix: #2f77d1;
-            --accents-1: #fafafa;
-            --accents-2: #eaeaea;
-            --accents-3: #999;
-            --accents-4: #888;
-            --accents-5: #666;
-            --accents-6: #444;
-            --accents-7: #333;
-            --accents-8: #111;
-            --nav-border: #bebebe80;
-            --nav-background: #fff;
-            --nav-text: #999;
-            --nav-text-active: #000;
-            --nav-pill: radial-gradient(#dadada 0%,#f1f1f1 100%);
-            --root-padding: 16px;
-            background-image: url(/bg-light.png);
-            background-repeat: no-repeat;
-        }
+    .card { @apply 
+        py-2 px-20 rounded-md flex flex-col h-20
+        border border-white/10
+        bg-[rgba(5,5,5,.5)]
+        backdrop-blur will-change-transform
     }
 
-    @media (prefers-color-scheme: dark) {
-        :global(body) {
-            --fg:#fff;
-            --bg: #000;
-            --accents-8: #fafafa;
-            --accents-7: #eaeaea;
-            --accents-6: #999;
-            --accents-5: #888;
-            --accents-4: #666;
-            --accents-3: #444;
-            --accents-2: #333;
-            --accents-1: #111;
-            --nav-border: #44444480;
-            --nav-background: #000;
-            --nav-text-active: #fff;
-            --nav-pill: radial-gradient(#505050 0%,#292929 100%);
-            background-image: url(/bg-dark.png);
-            background-repeat: no-repeat;
-        }
+    .card p { @apply
+        w-max
     }
 
-    main {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        position: relative;
-        width: 100%;
-        height: 100%;
-        max-width: 720px;
-        margin: 0 auto;
-        overflow: hidden;
+    .text-k, .text-v { @apply 
+        text-base
     }
 
-    a.pill {
-        border-radius: 9999px;
-        border: 1px solid var(--accents-2);
-        background: var(--accents-2);
-        font-weight: 600;
-        font-size: 14px;
-        color: var(--accents-7);
-        text-decoration: none;
-        padding: 8px 16px;
-        margin-bottom: 8px;
+    .text-k { @apply
+        text-[#888] font-normal
     }
 
-    a.pill:hover {
-        filter: brightness(.96);
-        transition: filter .2s ease
+    .text-v { @apply
+        text-white font-thin text-lg
     }
-
-    h1 {
-        font-size: 48px;
-        line-height: 1;
-        text-align: center;
-        color: var(--fg)
-    }
-
-    .description {
-        font-size: 18px;
-        color: var(--accents-5);
-    }
-
-    .meta {
-        display: grid;
-        grid-template-columns: repeat(2,1fr);
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        grid-gap: 0;
-        gap: 0;
-        margin-top: 25vh;
-    }
-
-    .info {
-        flex-direction: column;
-        text-align: center;
-        gap: 12px
-    }
-
-    .info,.info span {
-        display: flex;
-        align-items: center
-    }
-
-    .info span {
-        white-space: nowrap;
-        width: -moz-fit-content;
-        width: fit-content;
-        gap: 8px;
-        font-size: clamp(14px,2vw,16px);
-        color: var(--accents-5)
-    }
-
-    .info span.region strong {
-        color: var(--fg)
-    }
-
-    .info span svg {
-        width: 18px;
-        height: 18px
-    }
-
-    .info strong {
-        line-height: 1.2;
-        font-size: clamp(18px,5vw,40px)
-    }
-
-    footer {
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-        position: relative;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        text-align: center;
-        padding: 48px;
-        box-sizing: border-box;
-        font-size: 16px
-    }
-
-    footer p {
-        line-height: 20px;
-        color: var(--accents-7)
-    }
-
-    footer a {
-        height: -moz-fit-content;
-        height: fit-content
-    }
-
-    footer a:hover {
-        -webkit-text-decoration: hover;
-        text-decoration: hover
-    }
-
-    footer .details {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        font-size: inherit;
-        color: var(--fg)
-    }
-
-    footer .details a {
-        color: inherit;
-        -webkit-text-decoration-color: var(--mono8);
-        text-decoration-color: var(--mono8);
-        text-decoration-thickness: 1px;
-        text-underline-offset: 3px
-    }
-
-    @media (max-width: 960px) {
-        footer {
-            flex-direction:column;
-            align-items: center;
-            gap: 16px;
-            padding: 16px;
-            font-size: 13px
-        }
-    }
-
-    @media (max-width: 600px) {
-        .meta {
-            gap:8px
-        }
-        .info {
-            gap: 8px
-        }
-        .info span svg {
-            width: 14px;
-            height: 14px
-        }
-        footer {
-            gap: 12px
-        }
-    }   
-
 
 </style>

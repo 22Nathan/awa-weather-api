@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body { @apply 
+    h-full w-full overflow-hidden bg-black
+    bg-[url('https://weathergpt.vercel.app/bg-dark.png')]
+    bg-no-repeat bg-cover
+}
+
+/* * { @apply 
+    duration-200
+} */
